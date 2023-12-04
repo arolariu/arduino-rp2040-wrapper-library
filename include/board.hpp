@@ -8,6 +8,15 @@
 #include "joystick.hpp"
 #include "display.hpp"
 
+typedef struct {
+    uint8_t timesCompleted;
+    uint16_t timeBuffer;
+    uint16_t pauseBuffer;
+    bool isPaused;
+    bool isRunning;
+    bool isFinished;
+} Timer;
+
 class Board {
 private:
     Button *button;
@@ -15,6 +24,7 @@ private:
     LedRing *ledRing;
     Display *display;
     Joystick *joystick;
+    Timer timer;
 
 public:
     Board(
@@ -39,6 +49,12 @@ public:
     /* Joystick methods */
     JoystickDirection getJoystickDirection();
     JoystickCoords getJoystickCoords();
+
+    /* Timer methods */
+    void setTimer(const uint16_t &time, const uint16_t &pause);
+    void startTimer();
+    void pauseTimer();
+    uint8_t checkTimer();
 
     ~Board();
 };

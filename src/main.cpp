@@ -13,15 +13,11 @@
 #define JOYSTICK_X_PIN 0
 #define JOYSTICK_Y_PIN 1
 
-
 void printNetworkInformation();
 Board* board;
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for native USB port only
-  }
 
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -45,14 +41,18 @@ void setup() {
   printNetworkInformation();
 
   board = new Board(BUTTON_PIN, BTNLED_PIN, BUZZER_PIN, JOYSTICK_X_PIN, JOYSTICK_Y_PIN, LED_RING_PIN, 24);
+  board->setTimer(50*60, 10*60);
+  board->startTimer();
 }
 
 void loop() {
-  board->displayDate(6);
-  board->displayTime(7);
-  delay(1000);
+    auto buttonState = board->checkButtonType();
+    if (buttonState == ButtonType::DOUBLE_PRESS) {
+      board->solidLedRing(0xFF0000);
+    } else if (buttonState == ButtonType::SINGLE_PRESS) {
+      board->solidLedRing(0x0000ff);
+    }
 }
-
 
 void printNetworkInformation() {
   Serial.print("IPv4 address: ");

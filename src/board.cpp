@@ -31,37 +31,25 @@ void Board::clearDisplay() {
 
 void Board::displayTime(const uint8_t &lineNumber) {
     unsigned long epochTime = WiFi.getTime();
-    unsigned long hours = (epochTime % 86400L) / 3600;
+    unsigned long hours = (epochTime % 86400L) / 3600 + /* UTC+1 */ 1;
     unsigned long minutes = (epochTime % 3600) / 60;
     unsigned long seconds = epochTime % 60;
 
-    char* time = (char*)calloc(15, sizeof(char));
-    time[0] = 'T';
-    time[1] = 'i';
-    time[2] = 'm';
-    time[3] = 'e';
-    time[4] = ':';
-    time[5] = ' ';
-    time[6] = '0' + hours / 10;
-    time[7] = '0' + hours % 10;
-    time[8] = ':';
-    time[9] = '0' + minutes / 10;
-    time[10] = '0' + minutes % 10;
-    time[11] = ':';
-    time[12] = '0' + seconds / 10;
-    time[13] = '0' + seconds % 10;
-    time[14] = '\0';
+    char* time = (char*)calloc(21, sizeof(char));
+    sprintf(time, "Time: %02d:%02d:%02d", hours, minutes, seconds);
 
     display->setLineText(lineNumber, time);
+    free(time);
 }
 
 void Board::displayDate(const uint8_t &lineNumber) {
     time_t time = WiFi.getTime();
     struct tm *timeinfo = gmtime(&time);
-    char *date = (char*)calloc(18, sizeof(char));
+    char *date = (char*)calloc(21, sizeof(char));
     sprintf(date, "Date: %02d/%02d/%04d", timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
 
     display->setLineText(lineNumber, date);
+    free(date);
 }
 
 void Board::setDisplayLine(const uint8_t &lineNumber, const char *text) {
@@ -74,6 +62,53 @@ JoystickDirection Board::getJoystickDirection() {
 
 JoystickCoords Board::getJoystickCoords() {
     return joystick->getCoords();
+}
+
+void Board::setTimer(const uint16_t &time, const uint16_t &pause) {
+    timer.timeBuffer = time;
+    timer.pauseBuffer = pause;
+    timer.isPaused = false;
+    timer.isRunning = false;
+    timer.isFinished = false;
+}
+
+void Board::startTimer() {
+    timer.isRunning = true;
+    timer.isPaused = false;
+    timer.isFinished = false;
+}
+
+void Board::pauseTimer() {
+    timer.isPaused = true;
+    timer.isRunning = false;
+    timer.isFinished = false;
+}
+
+uint8_t Board::checkTimer() {
+    if (timer.isFinished) return 0;
+
+    if (timer.isRunning) {
+        if (timer.timeBuffer > 0) {
+            timer.timeBuffer--;
+            return timer.timeBuffer / 60;
+        } else {
+            timer.isRunning = false;
+            timer.isFinished = true;
+            timer.timesCompleted++;
+            return 0;
+        }
+    } else if (timer.isPaused) {
+        if (timer.pauseBuffer > 0) {
+            timer.pauseBuffer--;
+            return timer.pauseBuffer / 60;
+        } else {
+            timer.isPaused = false;
+            timer.isRunning = true;
+            return timer.timeBuffer / 60;
+        }
+    }
+
+    return 0;
 }
 
 Board::~Board() {
