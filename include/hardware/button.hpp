@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 enum ButtonType {
     NO_PRESS,
     SINGLE_PRESS,

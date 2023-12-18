@@ -1,10 +1,10 @@
-#include "button.hpp"
+#include "hardware/button.hpp"
 
 Button::Button(uint8_t pin, uint8_t ledPin)
 {
     this->pin = pin;
     this->ledPin = ledPin;
-    pinMode(pin, INPUT_PULLUP);
+    pinMode(pin, INPUT_PULLDOWN);
     pinMode(ledPin, OUTPUT);
 }
 
@@ -71,6 +71,7 @@ ButtonType Button::checkButtonState()
 
     return NO_PRESS;
 }
+
 
 Button::~Button()
 {

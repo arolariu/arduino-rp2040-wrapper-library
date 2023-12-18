@@ -1,21 +1,24 @@
-#include "buzzer.hpp"
+#include "hardware/vibration.hpp"
 
-Buzzer::Buzzer(uint8_t pin) {
+Vibration::Vibration(uint8_t pin)
+{
     this->pin = pin;
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
 }
 
-void Buzzer::on() {
+void Vibration::on()
+{
     digitalWrite(pin, HIGH);
 }
 
-void Buzzer::off() {
+void Vibration::off()
+{
     digitalWrite(pin, LOW);
 }
 
-Buzzer::~Buzzer() {
+Vibration::~Vibration()
+{
     digitalWrite(pin, LOW);
     pinMode(pin, INPUT);
 }
-
